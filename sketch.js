@@ -8,10 +8,14 @@
 let aspectRatio = 16 / 9;
 let currentFrameRate = 0;
 
+let ship;
+
 function setup() {
 
 	let { canvasWidth, canvasHeight } = getCanvasDimensions();
 	createCanvas(canvasWidth, canvasHeight);
+
+	ship = new Ship();
 }
 
 function windowResized() {
@@ -29,8 +33,8 @@ function getCanvasDimensions() {
 	}
 
 	return {
-		canvasWidth: canvasWidth,
-		canvasHeight: canvasHeight
+		canvasWidth,
+		canvasHeight
 	}
 }
 
@@ -47,10 +51,55 @@ function draw() {
 	textSize(26);
 	text(currentFrameRate, 10, 30);
 
-	if (mouseIsPressed) {
-		fill(0);
-	} else {
-		fill(255);
+	// if (mouseIsPressed) {
+	// 	fill(0);
+	// } else {
+	// 	fill(255);
+	// }
+	// ellipse(mouseX, mouseY, 80, 80);
+
+	ship.update();
+	ship.render();
+}
+
+function keyPressed() {
+	ship.setAcceleration(10);
+}
+
+function keyReleased() {
+	ship.setAcceleration(0);
+}
+
+function Ship() {
+
+	this.distance = 0;		// m
+	this.velocity = 0;		// m/s
+	this.acceleration = 0;	// m/s^2
+
+	this.update = () => {
+		this.distance += this.velocity * (deltaTime / 1000);
+		this.velocity += this.acceleration * (deltaTime / 1000);
 	}
-	ellipse(mouseX, mouseY, 80, 80);
+
+	this.setAcceleration = (a) => {
+		this.acceleration = a;
+	}
+
+	this.render = () => {
+		// Display ship stats
+		let widthOffset = 200;
+		let x = width - widthOffset;
+
+		fill(255);
+		rect(x, 0, widthOffset, 100);
+		fill(0);
+		textSize(20);
+		text("Distance: " + this.distance, x, 20);
+		text("Velocity: " + this.velocity, x, 40);
+		text("Acceleration: " + this.acceleration, x, 60);
+
+		// Display a demo ship
+		fill(255);
+		circle(this.distance % width, height / 2, 20);
+	}
 }
