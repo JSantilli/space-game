@@ -9,6 +9,7 @@ let aspectRatio = 16 / 9;
 let currentFrameRate = 0;
 
 let ship;
+let box;
 
 function setup() {
 
@@ -16,6 +17,7 @@ function setup() {
 	createCanvas(canvasWidth, canvasHeight);
 
 	ship = new Ship();
+	box = new Box();
 }
 
 function windowResized() {
@@ -40,8 +42,7 @@ function getCanvasDimensions() {
 
 function draw() {
 
-	fill(0);
-	rect(0, 0, width, height);
+	background(0);
 
 	if (frameCount % 4 === 0) {
 		currentFrameRate = frameRate().toFixed(2);
@@ -51,15 +52,11 @@ function draw() {
 	textSize(26);
 	text(currentFrameRate, 10, 30);
 
-	// if (mouseIsPressed) {
-	// 	fill(0);
-	// } else {
-	// 	fill(255);
-	// }
-	// ellipse(mouseX, mouseY, 80, 80);
-
 	ship.update();
 	ship.render();
+
+	box.update();
+	box.render();
 }
 
 function keyPressed() {
@@ -68,6 +65,14 @@ function keyPressed() {
 
 function keyReleased() {
 	ship.setAcceleration(0);
+}
+
+function mousePressed() {
+	box.setSelected(true);
+}
+
+function mouseReleased() {
+	box.setSelected(false);
 }
 
 function Ship() {
@@ -91,6 +96,7 @@ function Ship() {
 		let x = width - widthOffset;
 
 		fill(255);
+		rectMode(CORNER);
 		rect(x, 0, widthOffset, 100);
 		fill(0);
 		textSize(20);
@@ -101,5 +107,48 @@ function Ship() {
 		// Display a demo ship
 		fill(255);
 		circle(this.distance % width, height / 2, 20);
+	}
+}
+
+function Box() {
+
+	this.length = 20;
+	this.mass = 10;
+	this.position = createVector(500, 500);
+	this.velocity = createVector(0, 0);
+	this.acceleration = createVector(0, 0);
+
+	this.isSelected = false;
+
+	this.update = () => {
+		this.position.add(p5.Vector.mult(this.velocity, deltaTime / 1000));
+		this.velocity.add(p5.Vector.mult(this.acceleration, deltaTime / 1000));
+
+		if (this.isSelected) {
+			this.moveTowardCursor();
+		}
+	}
+
+	this.render = () => {
+		fill(255);
+		rectMode(CENTER);
+		rect(this.position.x, this.position.y, this.length);
+	}
+
+	this.moveTowardCursor = () => {
+		let mouseP = createVector(mouseX, mouseY);
+		let res = p5.Vector.sub(mouseP, this.position);
+		res.limit(1);
+		this.setAcceleration(res);
+
+		// box.setAcceleration(createVector(0, 0));
+	}
+
+	this.setAcceleration = (vector) => {
+		this.acceleration.add(vector);
+	}
+
+	this.setSelected = (b) => {
+		this.isSelected = b;
 	}
 }
