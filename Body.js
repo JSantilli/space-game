@@ -33,7 +33,22 @@ class Body {
 
 	*/
 
-	constructor(mass, position) {
+	/*
+
+	TODO: Consider a composition pattern for objects
+
+	An item:
+		* Can be a body
+		* Can contain stuff
+		* Can equip stuff?
+		
+
+	*/
+
+
+	constructor(world, mass, position) {
+
+		this.world = world;
 
 		this.mass = mass;
 		this.position = position;
@@ -42,44 +57,37 @@ class Body {
 
 		this.force = 0;
 		this.forceTimeRemaining = 0;
+
+		this.physicsComponent = new PhysicsComponent();
+
+		this.contents = [];
 	}
 
 	update() {
-		this.position += this.velocity * deltaTime / 1000;
-		this.velocity += this.acceleration * deltaTime / 1000;
 
-		// TODO: I end up with tiny errors probably as a result of the delta time variable evenly dividing a second, idk how to fix that
+		this.physicsComponent.update(this);
 
-		if (this.forceTimeRemaining > 0) {
-			this.acceleration = this.force / this.getMass();
-			this.forceTimeRemaining -= deltaTime / 1000;
-		} else {
-			this.force = 0;
-			this.forceTimeRemaining = 0;
-			this.acceleration = 0;
-		}
+		// if (this.forceTimeRemaining > 0) {
+		// 	this.acceleration = this.force / this.getMass();
+		// 	this.forceTimeRemaining -= deltaTime / 1000;
+		// } else {
+		// 	this.force = 0;
+		// 	this.forceTimeRemaining = 0;
+		// 	this.acceleration = 0;
+		// }
+
+		// this.position += this.velocity * deltaTime / 1000;
+		// this.velocity += this.acceleration * deltaTime / 1000;
 	}
 
 	render() {
 		push();
 
-		fill(255);
-		circle(this.position % width, height / 2, 20);
-
-		// Display Body stats
-		let widthOffset = 200;
-		let x = width - widthOffset;
-
-		fill(255);
-		rectMode(CORNER);
-		rect(x, 0, widthOffset, 100);
-		fill(0);
-		textSize(20);
-		text("Position: " + this.position, x, 20);
-		text("Velocity: " + this.velocity, x, 40);
-		text("Acceleration: " + this.acceleration, x, 60);
-		text("Force: " + this.force, x, 80);
-		text("FTR: " + this.forceTimeRemaining, x, 100);
+		if (this.position >= this.world.prevCheckpoint && this.position <= this.world.nextCheckpoint) {
+			fill(255);
+			let x = map(this.position, this.world.prevCheckpoint, this.world.nextCheckpoint, 100, width - 100);
+			circle(x, height / 2, 20);
+		}
 
 		pop();
 	}
@@ -91,7 +99,14 @@ class Body {
 
 	getMass() {
 		// TODO: eventually this will also need to return contained and equipped masses
-		return this.mass;
+
+		let mass = this.mass;
+
+		this.contents.forEach(body => {
+			mass += body.getMass();
+		});
+
+		return mass;
 	}
 
 }

@@ -8,20 +8,23 @@
 let aspectRatio = 16 / 9;
 let currentFrameRate = 0;
 
-// let ship;
-// let box;
-
+let astronaut;
 let ship;
+
+let world;
 
 function setup() {
 
 	let { canvasWidth, canvasHeight } = getCanvasDimensions();
 	createCanvas(canvasWidth, canvasHeight);
 
-	ship = new Body(10, 0);
+	world = new World();
 
-	// ship = new Ship();
-	// box = new Box();
+	astronaut = new Body(world, 10, 0);
+
+	ship = new Body(world, 1000, 1000);
+
+	world.setPlayer(astronaut);
 }
 
 function windowResized() {
@@ -56,24 +59,41 @@ function draw() {
 	textSize(26);
 	text(currentFrameRate, 10, 30);
 
+	astronaut.update();
+	astronaut.render();
+
 	ship.update();
 	ship.render();
+
+	world.update();
+	world.render();
+
+	// Display astronaut stats
+	let widthOffset = 200;
+	let x = width - widthOffset;
+
+	fill(255);
+	rectMode(CORNER);
+	rect(x, 0, widthOffset, 100);
+	fill(0);
+	textSize(20);
+	text("Position: " + astronaut.position, x, 20);
+	text("Velocity: " + astronaut.velocity, x, 40);
+	text("Acceleration: " + astronaut.acceleration, x, 60);
+	text("Force: " + astronaut.force, x, 80);
+	text("FTR: " + astronaut.forceTimeRemaining, x, 100);
 }
 
 function keyPressed() {
-	// ship.setAcceleration(10);
 }
 
 function keyReleased() {
-	// ship.setAcceleration(0);
 }
 
 function mousePressed() {
-	// box.setSelected(true);
 
-	ship.applyForce(10, 2);
+	astronaut.applyForce(100, 2);
 }
 
 function mouseReleased() {
-	// box.setSelected(false);
 }
